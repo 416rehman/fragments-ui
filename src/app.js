@@ -1,6 +1,7 @@
 // src/app.js
 
 import { Auth, getUser } from './auth.js';
+import { getUserFragments } from './api';
 
 async function init() {
     // Get our UI elements
@@ -27,6 +28,8 @@ async function init() {
         logoutBtn.disabled = true;
         return;
     }
+
+    await getUserFragments(user);
 
     // Log the user info for debugging purposes
     console.log({ user });
