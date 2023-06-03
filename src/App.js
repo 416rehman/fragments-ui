@@ -1,4 +1,4 @@
-import {Navbar, Button, Text, styled, Avatar, Row, Spacer} from "@nextui-org/react";
+import {Navbar, Button, Text, styled, Avatar, Row, Spacer, Popover} from "@nextui-org/react";
 import {Auth, getUser} from './utils/auth.js';
 import {useEffect, useState} from "react";
 import Fragments from "./components/Fragments/Fragments";
@@ -6,13 +6,20 @@ import NewFragment from "./components/NewFragment/NewFragment";
 import {UserContext} from "./utils/userContext";
 import {getUserFragments} from "./utils/api";
 
+import {useTheme as useNextTheme} from 'next-themes'
+import {Switch, useTheme} from '@nextui-org/react'
+
 const Box = styled("div", {
     boxSizing: "border-box",
 });
+
 export default function App() {
     const [user, setUser] = useState(null);
     const [fragments, setFragments] = useState([]);
     const [fragmentsLoading, setFragmentsLoading] = useState(false);
+
+    const {setTheme} = useNextTheme();
+    const {isDark, type} = useTheme();
 
     useEffect(() => {
         getUser().then(setUser);
@@ -84,11 +91,17 @@ export default function App() {
                     </Navbar.Brand>
                     <Navbar.Content>
                         <Navbar.Item>
-                            {user ? (
-                                <Button auto flat onClick={() => Auth.signOut()}>
-                                    Sign Out
-                                </Button>
-                            ) : (
+                            <Row css={{gap: "0.5rem"}} align={"baseline"}>
+                                <Text size={"xs"}>Dark Mode</Text>
+                                <Switch
+                                    size={"xs"}
+                                    checked={isDark}
+                                    onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
+                                />
+                            </Row>
+                        </Navbar.Item>
+                        <Navbar.Item>
+                            {user ? <></> : (
                                 <Button auto flat onClick={() => Auth.federatedSignIn()}>
                                     Sign In
                                 </Button>
@@ -96,10 +109,22 @@ export default function App() {
                         </Navbar.Item>
                         {user ? (
                             <Navbar.Item>
-                                <Avatar
-                                    text={user.username}
-                                    textColor="default"
-                                />
+                                <Popover>
+                                    <Popover.Trigger>
+                                        <Avatar
+                                            text={user.username}
+                                            textColor="default"
+                                            css={{
+                                                cursor: "pointer",
+                                            }}
+                                        />
+                                    </Popover.Trigger>
+                                    <Popover.Content>
+                                        <Button auto flat color={"error"} onClick={() => Auth.signOut()}>
+                                            Sign Out
+                                        </Button>
+                                    </Popover.Content>
+                                </Popover>
                             </Navbar.Item>
                         ) : (
                             <Navbar.Item>

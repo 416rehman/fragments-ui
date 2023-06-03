@@ -3,16 +3,37 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { createTheme, NextUIProvider } from "@nextui-org/react"
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
 
-// 1. import `NextUIProvider` component
-import {NextUIProvider} from '@nextui-org/react';
+const lightTheme = createTheme({
+    type: 'light'
+})
+
+const darkTheme = createTheme({
+    type: 'dark',
+    theme: {
+        colors: {
+            background: "#030407",
+        }
+    }
+})
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
-        <NextUIProvider>
-            <App/>
-        </NextUIProvider>
+        <NextThemesProvider
+            defaultTheme="system"
+            attribute="class"
+            value={{
+                light: lightTheme.className,
+                dark: darkTheme.className
+            }}
+        >
+            <NextUIProvider>
+                <App />
+            </NextUIProvider>
+        </NextThemesProvider>
     </React.StrictMode>
 );
 
