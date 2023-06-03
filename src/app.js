@@ -1,48 +1,65 @@
-// src/app.js
+import {Navbar, Button, Text, styled, Avatar} from "@nextui-org/react";
+import {Auth, getUser} from './utils/auth.js';
+import {useEffect, useState} from "react";
 
-import { Auth, getUser } from './auth.js';
-import { getUserFragments } from './api';
-
-async function init() {
-    // Get our UI elements
-    const userSection = document.querySelector('#user');
-    const loginBtn = document.querySelector('#login');
-    const logoutBtn = document.querySelector('#logout');
-
-    // Wire up event handlers to deal with login and logout.
-    loginBtn.onclick = () => {
-        // Sign-in via the Amazon Cognito Hosted UI (requires redirects), see:
-        // https://docs.amplify.aws/lib/auth/advanced/q/platform/js/#identity-pool-federation
-        Auth.federatedSignIn();
-    };
-    logoutBtn.onclick = () => {
-        // Sign-out of the Amazon Cognito Hosted UI (requires redirects), see:
-        // https://docs.amplify.aws/lib/auth/emailpassword/q/platform/js/#sign-out
-        Auth.signOut();
-    };
-
-    // See if we're signed in (i.e., we'll have a `user` object)
-    const user = await getUser();
-    if (!user) {
-        // Disable the Logout button
-        logoutBtn.disabled = true;
-        return;
-    }
-
-    await getUserFragments(user);
-
-    // Log the user info for debugging purposes
-    console.log({ user });
-
-    // Update the UI to welcome the user
-    userSection.hidden = false;
-
-    // Show the user's username
-    userSection.querySelector('.username').innerText = user.username;
-
-    // Disable the Login button
-    loginBtn.disabled = true;
+const Box = styled("div", {
+    boxSizing: "border-box",
+});
+export default function App() {
+    // check if we are signed in
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        getUser().then(setUser);
+    }, []);
+    return (
+        <Box
+            css={{
+                maxW: "100%"
+            }}
+        >
+            <Navbar isCompact isBordered variant="sticky">
+                <Navbar.Brand>
+                    <Text b color="inherit" hideIn="xs">
+                        Fragments UI
+                    </Text>
+                </Navbar.Brand>
+                <Navbar.Content>
+                    <Navbar.Item>
+                        {user ? (
+                            <Button auto flat onClick={() => Auth.signOut()}>
+                                Sign Out
+                            </Button>
+                        ) : (
+                            <Button auto flat onClick={() => Auth.federatedSignIn()}>
+                                Sign In
+                            </Button>
+                        )}
+                    </Navbar.Item>
+                    {user ? (
+                        <Navbar.Item>
+                            <Avatar
+                                text={user.username}
+                                color="gradient"
+                                textColor="white" />
+                        </Navbar.Item>
+                    ) : (
+                        <Navbar.Item>
+                            <Button auto flat onClick={() => Auth.signOut()}>
+                                Sign Up
+                            </Button>
+                        </Navbar.Item>
+                    )}
+                </Navbar.Content>
+            </Navbar>
+            <body>
+            <div className="App">
+                <header className="App-header">
+                    <p>
+                        {user ? `Hello, ${user.username}` : 'Please sign in.'}
+                    </p>
+                </header>
+            </div>
+            </body>
+        </Box>
+    )
 }
-
-// Wait for the DOM to be ready, then start the app
-addEventListener('DOMContentLoaded', init);
