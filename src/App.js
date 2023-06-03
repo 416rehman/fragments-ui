@@ -1,4 +1,4 @@
-import {Navbar, Button, Text, styled, Avatar} from "@nextui-org/react";
+import {Navbar, Button, Text, styled, Avatar, Row, Spacer} from "@nextui-org/react";
 import {Auth, getUser} from './utils/auth.js';
 import {useEffect, useState} from "react";
 import Fragments from "./components/Fragments/Fragments";
@@ -33,10 +33,42 @@ export default function App() {
     }, [user]);
 
     const fragmentCreationHandler = (fragmentData) => {
-        console.log("NEW FRAGMENT", fragmentData)
         setFragments([...fragments, fragmentData])
     }
 
+    const signedOutBody = (
+        <>
+            <Text
+                h1
+                css={{
+                    textGradient: "45deg, $blue600 -20%, $pink600 50%",
+                }}
+                weight="bold"
+            >
+                Fragments UI
+            </Text>
+            <Text h3 color="secondary">
+                A simple UI for Fragments.
+            </Text>
+            <Spacer y={2}/>
+            <Row css={{gap: "0.5rem"}} align={"baseline"} justify={"center"}>
+                <Button auto flat rounded color={"secondary"} size={"sm"} onClick={() => Auth.federatedSignIn()}>
+                    Sign In
+                </Button>
+                <Text h3 color="secondary">
+                    now to get started!
+                </Text>
+            </Row>
+
+        </>
+    )
+    const body = (
+        <>
+            <NewFragment onFragmentCreated={fragmentCreationHandler}/>
+            <Spacer y={2}/>
+            <Fragments fragments={fragments} loading={fragmentsLoading}/>
+        </>
+    )
     return (
         <UserContext.Provider value={user}>
             <Box
@@ -78,7 +110,6 @@ export default function App() {
                         )}
                     </Navbar.Content>
                 </Navbar>
-                <body>
                 <Box className="App" css={{
                     maxW: 1000,
                     mx: "auto",
@@ -86,12 +117,9 @@ export default function App() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "2rem"
                 }}>
-                    <NewFragment onFragmentCreated={fragmentCreationHandler}/>
-                    <Fragments fragments={fragments} loading={fragmentsLoading}/>
+                    {user ? body : signedOutBody}
                 </Box>
-                </body>
             </Box>
         </UserContext.Provider>
     )

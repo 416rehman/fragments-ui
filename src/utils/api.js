@@ -18,31 +18,57 @@ export async function getUserFragments(user) {
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragments data received', { data });
+        console.log('User fragments data received', {data});
         return data;
     } catch (err) {
-        console.error('Unable to call GET /v1/fragment', { err });
+        console.error('Unable to call GET /v1/fragment', {err});
     }
 }
 
-export async function getUserFragment(user, fragmentId) {
+/**
+ * Given an authenticated user, request a single fragment for this user from the
+ * @param user
+ * @param fragmentId
+ * @param as "txt" | "md" | "html" | "json" | "png" | "jpeg" | "webp" | "gif" | "jpg" etc
+ */
+export async function getUserFragment(user, fragmentId, as = "") {
     try {
-        const res = await fetch(`${apiUrl}/v1/fragments/${fragmentId}`, {
+        const extension = as ? `.${as}` : "";
+        const res = await fetch(`${apiUrl}/v1/fragments/${fragmentId}${extension}`, {
             headers: user.authorizationHeaders(),
         });
         if (!res.ok) {
             throw new Error(`${res.status} ${res.statusText}`);
         }
 
-        console.log('User fragment data received', { res });
-        return res;
+        const contentType = res.headers.get("content-type");
+        let data = null;
+        switch (contentType) {
+            case "application/json":
+                data = await res.json()
+                break
+            case "text/html":
+            case "text/markdown":
+            case "text/plain":
+                data = await res.text()
+                break
+            case "image/png":
+            case "image/jpeg":
+                data = await res.blob()
+                break
+            default:
+                data = await res.text()
+                break
+        }
+        console.log('User fragment data received', {data});
+        return data;
     } catch (err) {
-        console.error('Unable to call GET /v1/fragment', { err });
+        console.error('Unable to call GET /v1/fragment', {err});
     }
 }
 
 export async function createUserFragment(user, content, contentType) {
-    console.log('createUserFragment', { user, data: content, contentType });
+    console.log('createUserFragment', {user, data: content, contentType});
     try {
         const res = await fetch(`${apiUrl}/v1/fragments`, {
             method: 'POST',
@@ -56,10 +82,10 @@ export async function createUserFragment(user, content, contentType) {
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragment created', { data });
+        console.log('User fragment created', {data});
         return data;
     } catch (err) {
-        console.error('Unable to call POST /v1/fragment', { err });
+        console.error('Unable to call POST /v1/fragment', {err});
     }
 }
 
@@ -77,10 +103,10 @@ export async function updateUserFragment(user, fragmentId, contentType, newConte
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragment updated', { data });
+        console.log('User fragment updated', {data});
         return data;
     } catch (err) {
-        console.error('Unable to call PUT /v1/fragment', { err });
+        console.error('Unable to call PUT /v1/fragment', {err});
     }
 }
 
@@ -94,9 +120,9 @@ export async function deleteUserFragment(user, fragmentId) {
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragment deleted', { data });
+        console.log('User fragment deleted', {data});
         return data;
     } catch (err) {
-        console.error('Unable to call DELETE /v1/fragment', { err });
+        console.error('Unable to call DELETE /v1/fragment', {err});
     }
 }

@@ -1,15 +1,19 @@
-import {Card, Col, Row, Button, Text, Tooltip, Badge, Textarea, Loading} from "@nextui-org/react";
-import {useState, useContext} from "react";
+import {Card, Col, Row, Button, Text, Tooltip, Badge, Textarea, Popover, Dropdown} from "@nextui-org/react";
+import {useState, useContext, useEffect} from "react";
 import {DeleteIcon} from "../../icons/DeleteIcon";
 import {EditIcon} from "../../icons/EditIcon";
 import {UserContext} from "../../utils/userContext";
 import {getUserFragment, updateUserFragment, deleteUserFragment} from "../../utils/api";
+import {EyeIcon} from "../../icons/EyeIcon";
+import {conversionTable} from "../../utils/helpers";
+import {LoadingIndicator} from "../LoadingIndicator";
 
 export const FragmentCard = (props) => {
     const user = useContext(UserContext)
 
     const [isLoading, setIsLoading] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
+
     const [fragmentData, setFragmentData] = useState(null)
     const [fragment, setFragment] = useState({
         id: props.fragmentId,
@@ -19,44 +23,11 @@ export const FragmentCard = (props) => {
         updated: props.updatedAt
     })
 
-    const loading = () => {
-        return (
-            <Card.Body css={{width: "100%", height: "100%"}}>
-                <Button>
-                    <Loading type="points-opacity"/>
-                </Button>
-            </Card.Body>
-        )
-    }
     const getFragmentData = () => {
-        if (!fragmentData) {
-            setIsLoading(true)
-            getUserFragment(user, fragment.id).then(async (result) => {
-                if (result) {
-                    let data;
-                    switch (fragment.type) {
-                        case "application/json":
-                            data = await result.json()
-                            break
-                        case "text/html":
-                        case "text/markdown":
-                        case "text/plain":
-                            data = await result.text()
-                            break
-                        case "image/png":
-                        case "image/jpeg":
-                            data = await result.blob()
-                            break
-                        default:
-                            data = await result.text()
-                            break
-                    }
-                    if (data) {
-                        setFragmentData(data)
-                    }
-                }
-            }).finally(() => setIsLoading(false))
-        }
+        setIsLoading(true)
+        getUserFragment(user, fragment.id).then((data) => {
+            setFragmentData(data)
+        }).finally(() => setIsLoading(false))
     }
 
     const editFragment = () => {
@@ -190,7 +161,7 @@ export const FragmentCard = (props) => {
                 </Col>
             </Card.Header>
             <Card.Divider/>
-            {isLoading ? loading() : getBody()}
+            {isLoading ? LoadingIndicator() : getBody()}
             <Card.Divider/>
             <Card.Footer
                 isBlurred
@@ -212,6 +183,21 @@ export const FragmentCard = (props) => {
                             onPress={deleteFragment}
                         />
                     </Tooltip>
+                    <Tooltip content={"View As"}>
+                        <Popover isBordered>
+                            <Popover.Trigger>
+                                <Button
+                                    auto
+                                    icon={<EyeIcon size={20} fill={"currentColor"}/>}
+                                    color="neutral"
+                                    css={{borderRadius: "50%"}}
+                                />
+                            </Popover.Trigger>
+                            <Popover.Content>
+                                <FragmentViewer user={user} fragmentId={fragment.id} type={fragment.type}/>
+                            </Popover.Content>
+                        </Popover>
+                    </Tooltip>
                     <Tooltip content={isEditing ? "Save" : "Edit"}>
                         <Button
                             auto
@@ -226,4 +212,52 @@ export const FragmentCard = (props) => {
             </Card.Footer>
         </Card>
     )
-};
+}
+
+const FragmentViewer = ({user, fragmentId, type}) => {
+    const [convertedData, setConvertedData] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [selectedExtension, setSelectedExtension] = useState(null)
+
+    const getConvertedData = (as) => {
+        setIsLoading(true)
+        getUserFragment(user, fragmentId, as).then((data) => {
+            setConvertedData(data)
+        }).finally(() => setIsLoading(false))
+    }
+
+    useEffect(() => {
+        if (fragmentId && selectedExtension) {
+            console.log("Extension Changed. Getting Data")
+            getConvertedData(selectedExtension)
+        }
+    }, [fragmentId, selectedExtension])
+
+    return (
+        <Card>
+            <Card.Header>
+                <Row css={{gap: 5, alignItems: "center"}}>
+                    <Text size={"xs"} css={{fontWeight: "$medium"}}>View As</Text>
+                    <Dropdown>
+                        <Dropdown.Button light css={{textTransform: "uppercase"}}>
+                            {selectedExtension || "Format"}
+                        </Dropdown.Button>
+                        <Dropdown.Menu selectionMode={"single"} onSelectionChange={ async (e) => {
+                            setSelectedExtension([...e][0])
+                        }}>
+                            {conversionTable[type].map((ext) => (
+                                <Dropdown.Item key={ext}>
+                                    <Text css={{textTransform: "uppercase"}}>{ext}</Text>
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Row>
+            </Card.Header>
+            <Card.Divider/>
+            <Card.Body>
+                {isLoading ? LoadingIndicator() : convertedData}
+            </Card.Body>
+        </Card>
+    )
+}
