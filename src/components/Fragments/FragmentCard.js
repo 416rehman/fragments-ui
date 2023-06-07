@@ -2,14 +2,14 @@ import {Card, Col, Row, Button, Text, Tooltip, Badge, Textarea, Popover, Dropdow
 import {useState, useContext, useEffect} from "react";
 import {DeleteIcon} from "../../icons/DeleteIcon";
 import {EditIcon} from "../../icons/EditIcon";
-import {UserContext} from "../../utils/userContext";
+import {Contexts} from "../../utils/contexts";
 import {getUserFragment, updateUserFragment, deleteUserFragment} from "../../utils/api";
 import {EyeIcon} from "../../icons/EyeIcon";
 import {conversionTable} from "../../utils/helpers";
 import {LoadingIndicator} from "../LoadingIndicator";
 
 export const FragmentCard = (props) => {
-    const user = useContext(UserContext)
+    const user = useContext(Contexts)
 
     const [isLoading, setIsLoading] = useState(false)
     const [isEditing, setIsEditing] = useState(false)

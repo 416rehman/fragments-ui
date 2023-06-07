@@ -1,7 +1,7 @@
 import {Radio, Textarea, useInput, Col, Dropdown, Row, Card, Button, Loading} from "@nextui-org/react";
 import {useState, useMemo, useContext} from "react";
 import {createUserFragment} from "../../utils/api";
-import {UserContext} from "../../utils/userContext";
+import {Contexts} from "../../utils/contexts";
 
 export default function NewFragment(props) {
     const supportedContentTypes = {
@@ -13,7 +13,7 @@ export default function NewFragment(props) {
         "image/gif": "GIF Image",
         "image/webp": "WebP Image",
     };
-    const user = useContext(UserContext);
+    const user = useContext(Contexts);
     const {
         value: controlledValue,
         setValue: setControlledValue,

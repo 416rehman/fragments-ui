@@ -3,7 +3,7 @@ import {Auth, getUser} from './utils/auth.js';
 import {useEffect, useState} from "react";
 import Fragments from "./components/Fragments/Fragments";
 import NewFragment from "./components/NewFragment/NewFragment";
-import {UserContext} from "./utils/userContext";
+import {Contexts} from "./utils/contexts";
 import {getUserFragments} from "./utils/api";
 
 import {useTheme as useNextTheme} from 'next-themes'
@@ -77,7 +77,7 @@ export default function App() {
         </>
     )
     return (
-        <UserContext.Provider value={user}>
+        <Contexts.Provider value={user}>
             <Box
                 css={{
                     maxW: "100%"
@@ -146,6 +146,6 @@ export default function App() {
                     {user ? body : signedOutBody}
                 </Box>
             </Box>
-        </UserContext.Provider>
+        </Contexts.Provider>
     )
 }
