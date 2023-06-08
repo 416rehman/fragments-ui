@@ -1,4 +1,17 @@
-import {Radio, Textarea, Text, useInput, Col, Dropdown, Row, Card, Button, Loading, Badge} from "@nextui-org/react";
+import {
+    Radio,
+    Textarea,
+    Text,
+    useInput,
+    Col,
+    Dropdown,
+    Row,
+    Card,
+    Button,
+    Loading,
+    Badge,
+    Tooltip
+} from "@nextui-org/react";
 import {useState, useMemo, useContext, useRef} from "react";
 import {createUserFragment} from "../../utils/api";
 import {Contexts} from "../../utils/contexts";
@@ -30,9 +43,12 @@ export default function NewFragment(props) {
                         <Radio value="input" description="Input your data directly" isSquared size="sm">
                             Input
                         </Radio>
-                        <Radio value="file" description="Upload your data from a file" isSquared size="sm" disabled>
-                            File
-                        </Radio>
+                        <Tooltip content={"Coming soon"}>
+                            <Radio value="file" description="Upload your data from a file" isSquared size="sm"
+                                   isDisabled>
+                                File
+                            </Radio>
+                        </Tooltip>
                     </Radio.Group>
                 </Col>
             </Card.Header>
@@ -76,8 +92,11 @@ function InputFragment({onFragmentCreated, user}) {
             <Col>
                 <Row justify={"flex-end"}>
                     <Dropdown>
-                        <Dropdown.Button
-                            flat>{supportedContentTypes[contentTypeKey] || "Content Type"}</Dropdown.Button>
+                        <Tooltip content={"Content Type"}>
+                            <Dropdown.Button flat>
+                                {supportedContentTypes[contentTypeKey] || "Content Type"}
+                            </Dropdown.Button>
+                        </Tooltip>
                         <Dropdown.Menu
                             aria-label="Dynamic Actions"
                             selectionMode="single"
