@@ -10,3 +10,19 @@ export const conversionTable = {
     "image/gif": ["gif", "png", "jpeg", "webp", "jpg"],
     "image/jpg": ["jpg", "png", "webp", "gif"],
 };
+
+/** image onto base64 */
+export function convertToBase64(file){
+    return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+
+        fileReader.onload = () => {
+            resolve(fileReader.result)
+        }
+
+        fileReader.onerror = (error) => {
+            reject(error)
+        }
+    })
+}

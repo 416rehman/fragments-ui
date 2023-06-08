@@ -52,10 +52,17 @@ export async function getUserFragment(user, fragmentId, as = "") {
             case "text/plain":
                 data = await res.text()
                 break
+            case "image/png; charset=utf-8":
+            case "image/jpeg; charset=utf-8":
+            case "image/webp; charset=utf-8":
+            case "image/gif; charset=utf-8":
+            case "image/jpg; charset=utf-8":
             case "image/png":
             case "image/jpeg":
-                data = await res.blob()
-                break
+            case "image/webp":
+            case "image/gif":
+            case "image/jpg":
+                //TODO: convert image binary data to an image
             default:
                 data = await res.text()
                 break
@@ -68,7 +75,6 @@ export async function getUserFragment(user, fragmentId, as = "") {
 }
 
 export async function createUserFragment(user, content, contentType) {
-    console.log('createUserFragment', {user, data: content, contentType});
     try {
         const res = await fetch(`${apiUrl}/v1/fragments`, {
             method: 'POST',
@@ -86,6 +92,13 @@ export async function createUserFragment(user, content, contentType) {
         return data;
     } catch (err) {
         console.error('Unable to call POST /v1/fragment', {err});
+        if (err.message.includes("409")) {
+            throw new Error("Fragment already exists")
+        } else if (err.message.includes("413")) {
+            throw new Error("Fragment too large")
+        } else {
+            throw new Error("Unable to create fragment")
+        }
     }
 }
 

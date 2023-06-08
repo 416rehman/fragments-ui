@@ -107,7 +107,7 @@ export default function App() {
                                 </Button>
                             )}
                         </Navbar.Item>
-                        {user ? (
+                        {user && (
                             <Navbar.Item>
                                 <Popover>
                                     <Popover.Trigger>
@@ -125,12 +125,6 @@ export default function App() {
                                         </Button>
                                     </Popover.Content>
                                 </Popover>
-                            </Navbar.Item>
-                        ) : (
-                            <Navbar.Item>
-                                <Button auto flat onClick={() => Auth.signOut()}>
-                                    Sign Up
-                                </Button>
                             </Navbar.Item>
                         )}
                     </Navbar.Content>
