@@ -76,13 +76,7 @@ export const FragmentCard = (props) => {
 
     const getBody = () => {
         if (!fragment || !fragment.id) {
-            return (
-                <Card.Body css={{width: "100%", height: "100%"}}>
-                    <Button>
-                        <Text>No Fragment Found</Text>
-                    </Button>
-                </Card.Body>
-            )
+            return null;
         }
 
         if (!fragmentData) {
@@ -121,6 +115,10 @@ export const FragmentCard = (props) => {
                 </Card.Body>
             )
         }
+    }
+
+    if (fragment.id == null) {
+        return null;
     }
 
     return (
@@ -242,7 +240,7 @@ const FragmentViewer = ({user, fragmentId, type}) => {
                         <Dropdown.Button light css={{textTransform: "uppercase"}}>
                             {selectedExtension || "Format"}
                         </Dropdown.Button>
-                        <Dropdown.Menu selectionMode={"single"} onSelectionChange={ async (e) => {
+                        <Dropdown.Menu selectionMode={"single"} onSelectionChange={async (e) => {
                             setSelectedExtension([...e][0])
                         }}>
                             {conversionTable[type].map((ext) => (
