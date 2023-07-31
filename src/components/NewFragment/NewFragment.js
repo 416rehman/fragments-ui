@@ -9,26 +9,25 @@ import {
     Card,
     Button,
     Loading,
-    Badge,
     Tooltip
 } from "@nextui-org/react";
 import {useState, useMemo, useContext, useRef} from "react";
 import {createUserFragment} from "../../utils/api";
 import {Contexts} from "../../utils/contexts";
 import {DeleteIcon} from "../../icons/DeleteIcon";
-import {convertToBase64} from "../../utils/helpers";
 
 const supportedContentTypes = {
     "text/plain": "Text",
     "text/html": "HTML",
     "text/markdown": "Markdown",
+    "application/json": "JSON",
     "image/png": "PNG Image",
     "image/jpeg": "JPEG Image",
     "image/gif": "GIF Image",
     "image/webp": "WebP Image",
 };
 
-export default function NewFragment(props) {
+export default function NewFragment({onFragmentCreated}) {
     const user = useContext(Contexts);
 
     const [inputType, setInputType] = useState("input")
@@ -40,26 +39,23 @@ export default function NewFragment(props) {
                 <Col>
                     <Radio.Group label="Options" defaultValue={inputType} orientation="horizontal"
                                  onChange={(value) => setInputType(value)}>
-                        <Radio value="input" description="Input your data directly" isSquared size="sm">
-                            Input
+                        <Radio value="input" description="For text-based data" isSquared size="sm">
+                            Text
                         </Radio>
-                        <Tooltip content={"Coming soon"}>
-                            <Radio value="file" description="Upload your data from a file" isSquared size="sm"
-                                   isDisabled>
-                                File
-                            </Radio>
-                        </Tooltip>
+                        <Radio value="file" description="For image-based data" isSquared size="sm">
+                            Image
+                        </Radio>
                     </Radio.Group>
                 </Col>
             </Card.Header>
             <Card.Divider/>
-            {inputType == "input" ? <InputFragment onFragmentCreated={props.onFragmentCreated} user={user}/> :
-                <FileFragment onFragmentCreated={props.onFragmentCreated} user={user}/>}
+            {inputType == "input" ? <TextFragment onFragmentCreated={onFragmentCreated} user={user}/> :
+                <ImageFragment onFragmentCreated={onFragmentCreated} user={user}/>}
         </Card>
     );
 }
 
-function InputFragment({onFragmentCreated, user}) {
+function TextFragment({onFragmentCreated, user}) {
     const [contentType, setContentType] = useState(new Set(["text/plain"]));
     const [isLoading, setIsLoading] = useState(false)
 
@@ -78,7 +74,6 @@ function InputFragment({onFragmentCreated, user}) {
         setIsLoading(true)
         createUserFragment(user, controlledValue, contentTypeKey).then((result) => {
             if (result && result.status == 'ok') {
-                console.log("Fragment created successfully")
                 onFragmentCreated(result.fragment)
                 reset()
             }
@@ -115,8 +110,8 @@ function InputFragment({onFragmentCreated, user}) {
                 </Row>
             </Col>
             <Textarea {...bindings} css={{width: "100%", height: "100%"}}
-                      aria-label="Write your fragment's data here"
-                      placeholder="Write your fragment's data here"
+                      aria-label="Write your fragment's text data here"
+                      placeholder="Write your fragment's text data here"
                       onChange={(e) => setControlledValue(e.target.value)}
             />
         </Card.Body>
@@ -129,7 +124,7 @@ function InputFragment({onFragmentCreated, user}) {
     </>
 }
 
-function FileFragment({onFragmentCreated, user}) {
+function ImageFragment({onFragmentCreated, user}) {
     const inputRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false)
     const [file, setFile] = useState();
@@ -155,24 +150,20 @@ function FileFragment({onFragmentCreated, user}) {
             return;
         }
 
-        convertToBase64(file).then((binaryData) => {
-            setIsLoading(true)
-            createUserFragment(user, binaryData, file.type).then((result) => {
-                if (result && result.status == 'ok') {
-                    console.log("Fragment created successfully")
-                    onFragmentCreated(result.fragment)
-                    setFile(null)
-                }
-            })
-        }).catch((e) => {
-            alert("Error uploading file" + e)
+        setIsLoading(true)
+        createUserFragment(user, file, file.type).then((result) => {
+            if (result && result.status == 'ok') {
+                onFragmentCreated(result.fragment)
+                setFile(null)
+            }
         }).finally(() => setIsLoading(false))
     };
 
     return (
         <>
             <Card.Body>
-                <input type="file" onChange={handleFileChange} style={{display: "none"}} ref={inputRef}/>
+                <input type="file" onChange={handleFileChange} style={{display: "none"}} ref={inputRef}
+                       accept={"image/*"}/>
                 {file ? (
                     <Row style={{alignItems: "center"}} justify={"center"}>
                         <Row style={{
@@ -210,8 +201,10 @@ function FileFragment({onFragmentCreated, user}) {
                         </Row>
                     </Row>
                 ) : (
-                    <Button auto color="success" onPress={() => inputRef.current.click()}>
-                        Select File
+                    <Button auto onPress={() => inputRef.current.click()} style={{
+                        backgroundColor: "rgb(32,150,14)",
+                    }}>
+                        Select an Image
                     </Button>
                 )}
             </Card.Body>

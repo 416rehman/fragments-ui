@@ -18,7 +18,6 @@ export async function getUserFragments(user) {
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragments data received', {data});
         return data;
     } catch (err) {
         console.error('Unable to call GET /v1/fragment', {err});
@@ -62,12 +61,12 @@ export async function getUserFragment(user, fragmentId, as = "") {
             case "image/webp":
             case "image/gif":
             case "image/jpg":
-                //TODO: convert image binary data to an image
+                data = await res.blob()
+                break
             default:
                 data = await res.text()
                 break
         }
-        console.log('User fragment data received', {data});
         return data;
     } catch (err) {
         console.error('Unable to call GET /v1/fragment', {err});
@@ -88,10 +87,8 @@ export async function createUserFragment(user, content, contentType) {
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragment created', {data});
         return data;
     } catch (err) {
-        console.error('Unable to call POST /v1/fragment', {err});
         if (err.message.includes("409")) {
             throw new Error("Fragment already exists")
         } else if (err.message.includes("413")) {
@@ -116,7 +113,6 @@ export async function updateUserFragment(user, fragmentId, contentType, newConte
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragment updated', {data});
         return data;
     } catch (err) {
         console.error('Unable to call PUT /v1/fragment', {err});
@@ -133,7 +129,6 @@ export async function deleteUserFragment(user, fragmentId) {
             throw new Error(`${res.status} ${res.statusText}`);
         }
         const data = await res.json();
-        console.log('User fragment deleted', {data});
         return data;
     } catch (err) {
         console.error('Unable to call DELETE /v1/fragment', {err});

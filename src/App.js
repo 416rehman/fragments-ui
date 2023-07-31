@@ -19,7 +19,7 @@ export default function App() {
     const [fragmentsLoading, setFragmentsLoading] = useState(false);
 
     const {setTheme} = useNextTheme();
-    const {isDark, type} = useTheme();
+    const {isDark} = useTheme();
 
     useEffect(() => {
         getUser().then(setUser);
@@ -30,8 +30,8 @@ export default function App() {
             setFragmentsLoading(true);
             getUserFragments(user).then((result) => {
                 setFragmentsLoading(false);
-                if (result && result.status == "ok") {
-                    setFragments(result.fragments);
+                if (result && result?.status == "ok") {
+                    setFragments(result?.fragments);
                 }
             });
         } else {
@@ -39,8 +39,9 @@ export default function App() {
         }
     }, [user]);
 
-    const fragmentCreationHandler = (fragmentData) => {
-        setFragments([...fragments, fragmentData])
+    const fragmentCreationHandler = (newMetadata) => {
+        const newFragment = {metadata: newMetadata};
+        setFragments([...fragments, newFragment])
     }
 
     const signedOutBody = (
@@ -73,7 +74,11 @@ export default function App() {
         <>
             <NewFragment onFragmentCreated={fragmentCreationHandler}/>
             <Spacer y={2}/>
-            <Fragments fragments={fragments} loading={fragmentsLoading}/>
+            <Fragments fragments={fragments} loading={fragmentsLoading} onDelete={(index) => {
+                const newFragments = [...fragments]
+                newFragments.splice(index, 1)
+                setFragments(newFragments)
+            }}/>
         </>
     )
     return (

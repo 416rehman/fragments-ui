@@ -1,0 +1,9 @@
+version: "3"
+services:
+  # Fragments microservice API server
+  fragments-ui:
+    image: watchdogsrox/fragments-ui
+
+    # Ports to publish
+    ports:
+      - '3000:80'

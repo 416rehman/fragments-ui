@@ -5,23 +5,27 @@ import {EditIcon} from "../../icons/EditIcon";
 import {Contexts} from "../../utils/contexts";
 import {getUserFragment, updateUserFragment, deleteUserFragment} from "../../utils/api";
 import {EyeIcon} from "../../icons/EyeIcon";
-import {conversionTable} from "../../utils/helpers";
+import {conversionTable, showConvertedData} from "../../utils/helpers";
 import {LoadingIndicator} from "../LoadingIndicator";
 
-export const FragmentCard = (props) => {
+export const FragmentCard = ({fragmentId, fragmentSize, fragmentType, createdAt, updatedAt, onDelete}) => {
     const user = useContext(Contexts)
 
     const [isLoading, setIsLoading] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
 
     const [fragmentData, setFragmentData] = useState(null)
-    const [fragment, setFragment] = useState({
-        id: props.fragmentId,
-        size: props.fragmentSize,
-        type: props.fragmentType,
-        created: props.createdAt,
-        updated: props.updatedAt
-    })
+    const [fragment, setFragment] = useState(null)
+
+    useEffect(() => {
+        setFragment({
+            id: fragmentId,
+            size: fragmentSize,
+            type: fragmentType,
+            created: createdAt,
+            updated: updatedAt
+        })
+    }, [fragmentId, fragmentSize, fragmentType, createdAt, updatedAt])
 
     const getFragmentData = () => {
         setIsLoading(true)
@@ -38,7 +42,7 @@ export const FragmentCard = (props) => {
             setIsLoading(true)
             updateUserFragment(user, fragment.id, fragment.type, fragmentData)
                 .then((result) => {
-                    if (result.status == "ok") {
+                    if (result?.status == "ok") {
                         setFragment({
                             ...result.fragment,
                         })
@@ -60,15 +64,8 @@ export const FragmentCard = (props) => {
         setIsLoading(true)
         deleteUserFragment(user, fragment.id)
             .then((result) => {
-                console.log(result)
-                if (result.status == "ok") {
-                    setFragment({
-                        id: null,
-                        size: null,
-                        type: null,
-                        created: null,
-                        updated: null
-                    })
+                if (result?.status == "ok") {
+                    onDelete?.()
                 }
             })
             .finally(() => setIsLoading(false));
@@ -92,7 +89,7 @@ export const FragmentCard = (props) => {
             return (
                 <Card.Body css={{p: 0}}>
                     <Card.Image
-                        src={fragmentData}
+                        src={URL.createObjectURL(fragmentData)}
                         width="100%"
                         height="100%"
                         objectFit="cover"
@@ -109,7 +106,7 @@ export const FragmentCard = (props) => {
                         helperText={isEditing ? "Click the edit button to save changes" : ""}
                         helperColor={"primary"}
                         bordered={isEditing}
-                        initialValue={fragmentData}
+                        initialValue={showConvertedData(fragmentData)}
                         onChange={(e) => setFragmentData(e.target.value)}
                     />
                 </Card.Body>
@@ -117,7 +114,7 @@ export const FragmentCard = (props) => {
         }
     }
 
-    if (fragment.id == null) {
+    if (fragment?.id == null) {
         return null;
     }
 
@@ -226,7 +223,6 @@ const FragmentViewer = ({user, fragmentId, type}) => {
 
     useEffect(() => {
         if (fragmentId && selectedExtension) {
-            console.log("Extension Changed. Getting Data")
             getConvertedData(selectedExtension)
         }
     }, [fragmentId, selectedExtension])
@@ -254,7 +250,8 @@ const FragmentViewer = ({user, fragmentId, type}) => {
             </Card.Header>
             <Card.Divider/>
             <Card.Body>
-                {isLoading ? LoadingIndicator() : convertedData}
+                {/*The converted data could be a string or a blob or an object*/}
+                {isLoading ? LoadingIndicator() : showConvertedData(convertedData)}
             </Card.Body>
         </Card>
     )

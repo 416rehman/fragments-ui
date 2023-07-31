@@ -46,9 +46,6 @@ async function getUser() {
         // Get the user's username
         const username = currentAuthenticatedUser.username;
 
-        // If that didn't throw, we have a user object, and the user is authenticated
-        console.log('The user is authenticated', username);
-
         // Get the user's Identity Token, which we'll use later with our
         // microservice. See discussion of various tokens:
         // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-with-identity-providers.html
@@ -68,7 +65,6 @@ async function getUser() {
             },
         };
     } catch (err) {
-        console.log(err);
         // Unable to get user, return `null` instead
         return null;
     }
