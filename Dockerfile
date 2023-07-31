@@ -32,7 +32,7 @@ COPY ./.env.sh /usr/share/nginx/html/
 COPY ./.env /usr/share/nginx/html/
 
 # Add bash so we can run the .env.sh script
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash=5.2.15-r5
 
 # Make the .env.sh script executable
 RUN chmod +x /usr/share/nginx/html/.env.sh
