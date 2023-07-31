@@ -32,7 +32,7 @@ COPY ./.env.sh /usr/share/nginx/html/
 COPY ./.env /usr/share/nginx/html/
 
 # Add bash so we can run the .env.sh script and chmod the /usr/share/nginx/html/.env.sh script
-RUN apk add --no-cache bash=5.2 && chmod +x /usr/share/nginx/html/.env.sh
+RUN apk add --no-cache bash=5.1.4-r0 && chmod +x /usr/share/nginx/html/.env.sh
 
 # Execute the .env.sh script and start nginx
 CMD ["/bin/bash", "-c", "/usr/share/nginx/html/.env.sh && nginx -g \"daemon off;\""]
